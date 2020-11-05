@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Station Locations</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.rawgit.com/mapbox/wellknown/master/wellknown.js"></script>
+<body>
+  <div id="chart" style="width:100vw;height:100vh;"></div>
+  <script>
+    async function createChart() {
+      var resp = await fetch('http://localhost:3000/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            {
+              basin(basinId:3) {
+                geom
+                stations { name lat lon }
+              }
+            }`
+        })
+      });
+      var json = await resp.json();
+      var table = json.data;
+      var data = [
+        {
+          type: "scattermapbox",
+          text: table.basin.stations.map(row => row.name),
+          lon: table.basin.stations.map(row => row.lon),
+          lat: table.basin.stations.map(row => row.lat),
+          marker: { color: "black", size: 10 },
+        },
+      ];
+
+      var layout = {
+        dragmode: "zoom",
+        showlegend: false,
+        mapbox: {
+          style: "open-street-map",
+          center: { lat: 17.16, lon: 99.86 },
+          zoom: 6,
+          layers: [
+            {
+              source: {
+                type: "Feature",
+                geometry: wellknown.parse(table.basin.geom)
+              },
+              type: "fill", color: "red", opacity: 0.2,
+            },
+          ]
+        },
+        margin: { r: 0, t: 0, b: 0, l: 0 }
+      };
+
+      var config = { responsive: true };
+      Plotly.newPlot("chart", data, layout, config);
+    }
+
+    createChart();
+  </script>
+</body>
+</html>
