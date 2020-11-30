@@ -33,6 +33,6 @@ from openapi_server import encoder
 
 app = connexion.App(__name__,)
 app.app.json_encoder = encoder.JSONEncoder
-app.add_api('openapi/rain-api.yaml')
+app.add_api('openapi/road.yaml')
 app.run(port=8080,debug=True)
 

@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: Road API
+  description:
+    This API provides height and acceleration data for specific location.
+  version: 3.0.0
+servers:
+  - url: /road/v1
+paths:
+  /heights:
+    get:
+      summary: Returns a list of all heights.
+      operationId: controller.get_heights
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Height'
+
+  /accelerations:
+    get:
+      summary: Returns a list of all accelerations.
+      operationId: controller.get_accelerations
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Acceleration'
+
+  /heightAVG:
+    get:
+      summary: Returns a avg of all heights of all grouping.
+      operationId: controller.get_height_avg
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HeightAVG'
+
+  /accelerationAVG:
+    get:
+      summary: Returns a avg of all accelerations of all grouping.
+      operationId: controller.get_acceleration_avg
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccelerationAVG'
+
+  /correlation:
+    get:
+      summary: Returns a correlation of height and acceleration of all grouping.
+      operationId: controller.get_correlation
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Correlation'
+
+components:
+  schemas:
+    Height:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Latitude:
+          type: number
+        Longitude:
+          type: number
+        Height:
+          type: number
+          description: All height in each location
+    Acceleration:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Latitude:
+          type: number
+        Longitude:
+          type: number
+        Acceleration:
+          type: number
+          description: All accelleration in each location
+    HeightAVG:
+      type: object
+      properties:
+        Grouping:
+          type: string
+        HeightAVG:
+          type: number
+          description: Height average of all grouping
+    AccelerationAVG:
+      type: object
+      properties:
+        Grouping:
+          type: string
+        AccellerationAVG:
+          type: number
+          description: Acceleration average of all grouping
+    Correlation:
+      type: object
+      properties:
+        Grouping:
+          type: string
+        Correlation:
+          type: number
+          description: Correlation of all grouping

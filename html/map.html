@@ -17,12 +17,15 @@
         },
         body: JSON.stringify({
           query: `
-            {
-              basin(basinId:3) {
+            {basins {
+                name
                 geom
-                stations { name lat lon }
-              }
-            }`
+  		stations{
+                  name
+                  lat
+                  lon
+                }
+            }}`
         })
       });
       var json = await resp.json();
@@ -30,9 +33,37 @@
       var data = [
         {
           type: "scattermapbox",
-          text: table.basin.stations.map(row => row.name),
-          lon: table.basin.stations.map(row => row.lon),
-          lat: table.basin.stations.map(row => row.lat),
+          text: table.basins[0].stations.map(row => row.name),
+          lon: table.basins[0].stations.map(row => row.lon),
+          lat: table.basins[0].stations.map(row => row.lat),
+          marker: { color: "black", size: 10 },
+        },
+	{
+          type: "scattermapbox",
+          text: table.basins[1].stations.map(row => row.name),
+          lon: table.basins[1].stations.map(row => row.lon),
+          lat: table.basins[1].stations.map(row => row.lat),
+          marker: { color: "black", size: 10 },
+        },
+	{
+          type: "scattermapbox",
+          text: table.basins[2].stations.map(row => row.name),
+          lon: table.basins[2].stations.map(row => row.lon),
+          lat: table.basins[2].stations.map(row => row.lat),
+          marker: { color: "black", size: 10 },
+        },
+	{
+          type: "scattermapbox",
+          text: table.basins[3].stations.map(row => row.name),
+          lon: table.basins[3].stations.map(row => row.lon),
+          lat: table.basins[3].stations.map(row => row.lat),
+          marker: { color: "black", size: 10 },
+        },
+	{
+          type: "scattermapbox",
+          text: table.basins[4].stations.map(row => row.name),
+          lon: table.basins[4].stations.map(row => row.lon),
+          lat: table.basins[4].stations.map(row => row.lat),
           marker: { color: "black", size: 10 },
         },
       ];
@@ -48,9 +79,37 @@
             {
               source: {
                 type: "Feature",
-                geometry: wellknown.parse(table.basin.geom)
+                geometry: wellknown.parse(table.basins[0].geom)
               },
               type: "fill", color: "red", opacity: 0.2,
+            },
+	    {
+              source: {
+                type: "Feature",
+                geometry: wellknown.parse(table.basins[1].geom)
+              },
+              type: "fill", color: "blue", opacity: 0.2,
+            },
+	    {
+              source: {
+                type: "Feature",
+                geometry: wellknown.parse(table.basins[2].geom)
+              },
+              type: "fill", color: "yellow", opacity: 0.2,
+            },
+	    {
+              source: {
+                type: "Feature",
+                geometry: wellknown.parse(table.basins[3].geom)
+              },
+              type: "fill", color: "cyan", opacity: 0.2,
+            },
+	    {
+              source: {
+                type: "Feature",
+                geometry: wellknown.parse(table.basins[4].geom)
+              },
+              type: "fill", color: "purple", opacity: 0.2,
             },
           ]
         },

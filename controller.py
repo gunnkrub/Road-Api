@@ -9,100 +9,86 @@ from openapi_server import models
 def db_cursor():
     return mysql.connect(host=DB_HOST,user=DB_USER,passwd=DB_PASSWD,db=DB_NAME).cursor()
 
-def get_basins():
+def get_heights():
     with db_cursor() as cs:
-        cs.execute("SELECT basin_id,name,area FROM basin")
-        result = [models.Basin(*row) for row in cs.fetchall()]
+        cs.execute("SELECT ID,Latitude,Longitude,Height FROM Height")
+        result = [models.Height(*row) for row in cs.fetchall()]
         return result
 
-def get_basin_details(basinId):
+def get_accelerations():
     with db_cursor() as cs:
-        cs.execute("""
-            SELECT basin_id,name,area
-            FROM basin
-            WHERE basin_id=%s
-            """, [basinId])
-        result = cs.fetchone()
-    if result:
-        basin_id,name,area = result
-        return models.Basin(*result)
-    else:
-        abort(404)
-
-def get_basin_geom(basinId):
-    with db_cursor() as cs:
-        cs.execute("""
-            SELECT ST_AsText(geom)
-            FROM basin_geom
-            INNER JOIN basin on basin.basin_id = basin_geom.basin_id
-            WHERE basin.basin_id=%s
-            """, [basinId])
-        result = cs.fetchone()
-    if result:
-        return result[0]
-    else:
-        abort(404)
-
-def get_stations_in_basin(basinId):
-    with db_cursor() as cs:
-        cs.execute("""
-            SELECT station_id,basin_id,ename,lat,lon
-            FROM station WHERE basin_id=%s
-            """, [basinId])
-        result = [models.Station(*row) for row in cs.fetchall()]
+        cs.execute("SELECT ID,Latitude,Longitude,Acceleration FROM Acceleration")
+        result = [models.Acceleration(*row) for row in cs.fetchall()]
         return result
 
-def get_station_details(stationId):
+def get_height_avg():
     with db_cursor() as cs:
         cs.execute("""
-            SELECT station_id,basin_id,ename,lat,lon 
-            FROM station 
-            WHERE station_id=%s
-            """, [stationId])
+            SELECT a.grouping, AVG(h.Height) as HeightAVG
+            FROM Height as h
+            INNER JOIN Acceleration as a on h.Latitude = a.Latitude AND h.Longitude = a.Longitude
+            GROUP BY a.grouping
+            """)
         result = cs.fetchone()
-    if result:
-        return models.Station(*result)
-    else:
-        abort(404)
+        if result:
+            return models.HeightAVG(*result)
+        else:
+            abort(404)
 
-def get_basin_annual_rainfall(basinId,year):
+def get_acceleration_avg():
     with db_cursor() as cs:
         cs.execute("""
-            SELECT AVG(total_amount)
-            FROM (
-                SELECT SUM(r.amount) as total_amount
-                FROM rainfall r
-                INNER JOIN station s ON r.station_id = s.station_id
-                INNER JOIN basin b ON s.basin_id = b.basin_id
-                WHERE b.basin_id=%s AND r.year=%s
-                GROUP BY r.station_id
-            ) station_total
-            """, [basinId,year])
+            SELECT a.grouping, AVG(a.acceleration) as AccelerationAVG
+            FROM Height as h
+            INNER JOIN Acceleration as a on h.Latitude = a.Latitude AND h.Longitude = a.Longitude
+            GROUP BY a.grouping
+            """)
         result = cs.fetchone()
-    if result and result[0]:
-        amount = round(result[0],2)
-        return amount
-    else:
-        abort(404)
+        if result:
+            return models.AccelerationAVG(*result)
+        else:
+            abort(404)
 
-def get_basin_monthly_average(basinId):
+def get_correlation():
     with db_cursor() as cs:
         cs.execute("""
-            SELECT month, AVG(monthly_amount)
-            FROM (
-                SELECT SUM(r.amount) as monthly_amount, month
-                FROM rainfall r
-                INNER JOIN station s ON r.station_id = s.station_id
-                INNER JOIN basin b ON s.basin_id = b.basin_id
-                WHERE b.basin_id=%s
-                GROUP BY r.station_id, month, year
-            ) monthly
-            GROUP BY month
-            """, [basinId])
-        months = ['Jan','Feb','Mar','Apr','May','Jun',
-                  'Jul','Aug','Sep','Oct','Nov','Dec']
-        result = [
-                models.MonthlyAverage(months[month-1],month,round(amount,2))
-                for month,amount in cs.fetchall()
-            ]
-        return result
+            SELECT
+            Y.Grouping,
+            ((tot_sum - (hei_sum * acc_sum / _count)) / sqrt((hei_sum_sq - pow(hei_sum, 2.0) / _count) * (acc_sum_sq - pow(acc_sum, 2.0) / _count))) AS "Correlation"
+            FROM(
+                SELECT
+	            X.Grouping,
+                sum(Height) AS hei_sum, #sigma x
+                sum(Acceleration) AS acc_sum, #sigma y
+                sum(Height * Height) AS hei_sum_sq, #sigma x^2
+                sum(Acceleration * Acceleration) AS acc_sum_sq, #sigma y^2
+                sum(Height * Acceleration) AS tot_sum, #sigma xy
+                count(*) as _count
+                FROM(
+                    SELECT h.Height AS Height, a.Acceleration AS Acceleration, a.Grouping
+                    FROM Height h
+                    INNER JOIN Acceleration a ON h.Latitude = a.Latitude AND h.Longitude = a.Longitude
+                    WHERE h.Height IS NOT NULL
+                ) X
+            GROUP BY X.Grouping
+            ) Y
+        """)
+        result = cs.fetchone()
+        if result:
+            return models.Correlation(*result)
+        else:
+            abort(404)
+# def get_height_mean(Grouping):
+#     with db_cursor() as cs:
+#         cs.execute("""
+#             SELECT a.%s, AVG(h.Height) as HeightAVG
+#             FROM Height as h
+#             INNER JOIN Acceleration as a on h.Latitude = a.Latitude AND h.Longitude = a.Longitude
+#             GROUP BY a.%s
+#             """, [Grouping, Grouping])
+#         result = cs.fetchone()
+#         if result:
+#             return models.HeightAVG(*result)
+#         else:
+#             abort(404)
+

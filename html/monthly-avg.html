@@ -17,7 +17,7 @@
         body: JSON.stringify({
           query: `
             {
-              basin(basinId: 3) {
+              basins {
                 name
                 avgMonthlyRainfalls {
                   amount
@@ -31,14 +31,34 @@
       var table = json.data;
 
       var data = [{
-        x: table.basin.avgMonthlyRainfalls.map(row => row.month),
-        y: table.basin.avgMonthlyRainfalls.map(row => row.amount),
+        x: table.basins[0].avgMonthlyRainfalls.map(row => row.month),
+        y: table.basins[0].avgMonthlyRainfalls.map(row => row.amount),
         type: 'line',
-        name: table.basin.name,
+        name: table.basins[0].name,
+      },{
+	x: table.basins[1].avgMonthlyRainfalls.map(row => row.month),
+        y: table.basins[1].avgMonthlyRainfalls.map(row => row.amount),
+        type: 'line',
+        name: table.basins[1].name,
+      },{
+	x: table.basins[2].avgMonthlyRainfalls.map(row => row.month),
+        y: table.basins[2].avgMonthlyRainfalls.map(row => row.amount),
+        type: 'line',
+        name: table.basins[2].name,
+      },{
+        x: table.basins[3].avgMonthlyRainfalls.map(row => row.month),
+        y: table.basins[3].avgMonthlyRainfalls.map(row => row.amount),
+        type: 'line',
+        name: table.basins[3].name,
+      },{
+        x: table.basins[4].avgMonthlyRainfalls.map(row => row.month),
+        y: table.basins[4].avgMonthlyRainfalls.map(row => row.amount),
+        type: 'line',
+        name: table.basins[4].name,
       }];
       console.log(data);
       var layout = {
-        title: 'Average Monthly Rainfalls for Ping River Basin',
+        title: 'Average Monthly Rainfalls for all Basins',
         xaxis: {
           title: 'Month'
         },
