@@ -1,4 +1,4 @@
-Rain API Server with Visualization Examples
+Road API Server with Visualization
 ===========================================
 
-An example project for RESTful API development using OpenAPI and Python.  It contains a few examples for data visualization on a web browser.
+Used template from Rain API 
