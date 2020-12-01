@@ -77,6 +77,20 @@ paths:
                 items:
                   $ref: '#/components/schemas/Correlation'
 
+  /heightAndAcceleration:
+    get:
+      summary: Returns a height and correlation of all grouping.
+      operationId: controller.get_height_and_acceleration
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HeightAndAccel'
+
 components:
   schemas:
     Height:
@@ -102,7 +116,7 @@ components:
           type: number
         Acceleration:
           type: number
-          description: All accelleration in each location
+          description: All acceleration in each location
     HeightAVG:
       type: object
       properties:
@@ -116,7 +130,7 @@ components:
       properties:
         Grouping:
           type: string
-        AccellerationAVG:
+        AccelerationAVG:
           type: number
           description: Acceleration average of all grouping
     Correlation:
@@ -127,3 +141,20 @@ components:
         Correlation:
           type: number
           description: Correlation of all grouping
+    HeightAndAccel:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Latitude:
+          type: number
+        Longitude:
+          type: number
+        Height:
+          type: number
+          description: All height in each location
+        Acceleration:
+          type: number
+          description: All acceleration in each location
+        Grouping:
+          type: string

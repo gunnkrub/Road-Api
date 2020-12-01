@@ -11,7 +11,7 @@ def db_cursor():
 
 def get_heights():
     with db_cursor() as cs:
-        cs.execute("SELECT ID,Latitude,Longitude,Height FROM Height")
+        cs.execute("SELECT ID,Latitude,Longitude,Height FROM Height WHERE Height IS NOT NULL;")
         result = [models.Height(*row) for row in cs.fetchall()]
         return result
 
@@ -29,9 +29,9 @@ def get_height_avg():
             INNER JOIN Acceleration as a on h.Latitude = a.Latitude AND h.Longitude = a.Longitude
             GROUP BY a.grouping
             """)
-        result = cs.fetchone()
+        result = [models.HeightAVG(Grouping, HeightAVG) for Grouping, HeightAVG in cs.fetchall()]
         if result:
-            return models.HeightAVG(*result)
+            return result
         else:
             abort(404)
 
@@ -43,9 +43,9 @@ def get_acceleration_avg():
             INNER JOIN Acceleration as a on h.Latitude = a.Latitude AND h.Longitude = a.Longitude
             GROUP BY a.grouping
             """)
-        result = cs.fetchone()
+        result = [models.AccelerationAVG(Grouping, AccelerationAVG) for Grouping, AccelerationAVG in cs.fetchall()]
         if result:
-            return models.AccelerationAVG(*result)
+            return result
         else:
             abort(404)
 
@@ -73,22 +73,23 @@ def get_correlation():
             GROUP BY X.Grouping
             ) Y
         """)
-        result = cs.fetchone()
+        result = [models.Correlation(Grouping, Correlation) for Grouping, Correlation in cs.fetchall()]
         if result:
-            return models.Correlation(*result)
+            return result
         else:
             abort(404)
-# def get_height_mean(Grouping):
-#     with db_cursor() as cs:
-#         cs.execute("""
-#             SELECT a.%s, AVG(h.Height) as HeightAVG
-#             FROM Height as h
-#             INNER JOIN Acceleration as a on h.Latitude = a.Latitude AND h.Longitude = a.Longitude
-#             GROUP BY a.%s
-#             """, [Grouping, Grouping])
-#         result = cs.fetchone()
-#         if result:
-#             return models.HeightAVG(*result)
-#         else:
-#             abort(404)
+
+def get_height_and_acceleration():
+    with db_cursor() as cs:
+        cs.execute("""
+                SELECT Height.ID , Height.Latitude, Height.Longitude, Height.Height , Acceleration.Acceleration, Acceleration.Grouping
+                FROM Height 
+                INNER JOIN Acceleration on Height.Latitude = Acceleration.Latitude and Height.Longitude = Acceleration.Longitude
+            """)
+        result = [models.HeightAndAccel(ID, Latitude, Longitude, Height, Acceleration, Grouping) for ID, Latitude, Longitude, Height, Acceleration, Grouping in cs.fetchall()]
+        if result:
+            return result
+        else:
+            abort(404)
+
 
